@@ -1,0 +1,40 @@
+%{
+import string
+
+chars = [c for c in string.ascii_uppercase]
+count = 7
+}%
+
+import XCTest
+@testable import fns
+
+class Test_pipe: XCTestCase {
+
+    func test() {
+    % for i in range(0, count - 1):
+        XCTAssertEqual(
+            pipe(${(", ".join(chars[slice(0, i + 2)])).lower()})(1),
+            1
+        )
+        
+        XCTAssertEqual(
+            try? pipe(${", ".join(map(lambda t: "{}Throws".format(t.lower()), chars[slice(0, i + 2)]))})(1),
+            1
+        )
+        
+    % end
+    }
+}
+
+
+% for i in range(0, count):
+private func ${chars[i].lower()}(_ x: Int) -> Int {
+    return x
+}
+
+private func ${chars[i].lower()}Throws(_ x: Int) throws -> Int {
+    return x
+}
+
+% end
+    

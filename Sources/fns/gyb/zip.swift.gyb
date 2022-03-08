@@ -1,0 +1,96 @@
+%{
+import string
+
+chars = [c for c in string.ascii_uppercase]
+count = 7
+
+def sep(fix, spaces):
+    return fix + " " * spaces
+}%
+
+public func zip<A, B, Z>(
+    _ a: A,
+    _ b: B,
+    _ fn: (A.Element, B.Element) throws -> Z
+)
+    rethrows -> [Z]
+    where
+        A: Sequence,
+        B: Sequence
+{
+    return try zip(a, b).lazy.map(fn)
+}
+
+% for i in range(3, count + 1):
+%{
+    types = chars[slice(0, i)]
+}%
+public func zip<${", ".join(types)}>(
+    ${sep(",\n", 4).join(map(lambda t : "_ {}: {}".format(t.lower(), t), types))}
+)
+    -> Zip${i}Sequence<${", ".join(types)}>
+{
+    return Zip${i}Sequence(${", ".join(types).lower()})
+}
+
+public func zip<${", ".join(types)}, Z>(
+    ${sep(",\n", 4).join(map(lambda t : "_ {}: {}".format(t.lower(), t), types))},
+    _ fn: (${", ".join(map(lambda t : "{}.Element".format(t), types))}) throws -> Z
+)
+    rethrows -> [Z]
+    where
+        ${sep(",\n", 8).join(map(lambda t : "{}: Sequence".format(t), types))}
+{
+    return try zip(${", ".join(map(lambda t : "{}".format(t.lower()), types))}).lazy.map(fn)
+}
+
+public struct Zip${i}Sequence<
+    ${sep(",\n", 4).join(map(lambda t : "{}: Sequence".format(t), types))}
+>: Sequence {
+
+    ${sep("\n", 4).join(map(lambda t : "let {}: {}".format(t.lower(), t), types))}
+
+    public init(
+        ${sep(",\n", 8).join(map(lambda t : "_ {}: {}".format(t.lower(), t), types))}
+    ) {
+        ${sep("\n", 8).join(map(lambda t : "self.{} = {}".format(t.lower(), t.lower()), types))}
+    }
+
+    public struct Iterator: IteratorProtocol {
+        ${sep("\n", 8).join(map(lambda t : "var iterator{}: {}.Iterator".format(t, t), types))}
+
+        init(
+            ${sep(",\n", 12).join(map(lambda t : "_ iterator{}: {}.Iterator".format(t, t), types))}
+        ) {
+            ${sep("\n", 12).join(map(lambda t : "self.iterator{} = iterator{}".format(t, t), types))}
+        }
+
+        public typealias Element = (
+            ${sep(",\n", 12).join(map(lambda t : "{}.Element".format(t), types))}
+        )
+
+        var end = false
+
+        public mutating func next() -> Element? {
+            if end { return nil }
+
+            guard
+                ${sep(",\n", 16).join(map(lambda t : "let {} = iterator{}.next()".format(t.lower(), t), types))}
+            else {
+                end = true
+                return nil
+            }
+
+            return (
+                ${", ".join(map(lambda t : "{}".format(t.lower()), types))}
+            )
+        }
+    }
+    
+    public func makeIterator() -> Iterator {
+        return Iterator(
+            ${",\n            ".join(map(lambda t : "{}.makeIterator()".format(t.lower()), types))}
+        )
+    }
+}
+% end

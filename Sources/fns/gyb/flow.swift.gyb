@@ -1,0 +1,45 @@
+%{
+import string
+
+chars = [c for c in string.ascii_uppercase]
+count = 7
+}%
+
+% for i in range(3, count + 2):
+%{
+    types = chars[slice(0, i)]
+
+    fns = map(lambda i: "fn{}".format(types[i]), range(0, len(types) - 1))
+
+    def fmtFnCall(fn):
+        if (fn == fns[0]):
+            return "{}(a)".format(fn)
+        else:
+            return "flatMap({})".format(fn)
+
+    fnCalls = ".".join(map(fmtFnCall, fns))
+}%
+public func flow<${", ".join(types)}>(
+  % for i in range(0, len(types) - 1):
+  _ fn${types[i]}: @escaping (${types[i]}) -> ${types[i + 1]}?${"" if i == len(types) - 2 else ","}
+  % end
+)
+    -> (A) -> ${types[len(types) - 1]}?
+{
+    return { (a: A) -> ${types[len(types) - 1]}? in
+        ${fnCalls}
+    }
+}
+
+public func flow<${", ".join(types)}>(
+  % for i in range(0, len(types) - 1):
+  _ fn${types[i]}: @escaping (${types[i]}) throws -> ${types[i + 1]}?${"" if i == len(types) - 2 else ","}
+  % end
+)
+    -> (A) throws -> ${types[len(types) - 1]}?
+{
+    return { (a: A) -> ${types[len(types) - 1]}? in
+        try ${fnCalls}
+    }
+}
+% end

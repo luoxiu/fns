@@ -1,0 +1,32 @@
+%{
+import string
+
+chars = [c for c in string.ascii_uppercase]
+count = 7
+}%
+
+@testable import fns
+import XCTest
+
+class Test_curry: XCTestCase {
+
+    func test() {
+        % for i in range(2, count + 1):
+        XCTAssertEqual(
+            curry(fn)${"".join(map(lambda i: "({})".format(i), range(0, i)))},
+            ${(0 + i - 1) * i / 2}
+        )
+        % end
+    }
+}
+
+% for i in range(2, count + 1):
+private func fn(
+    ${",\n    ".join(map(lambda t : "_ {}: Int".format(t.lower()), chars[slice(0, i)]))}
+)
+    -> Int
+{
+    return ${" + ".join(map(lambda t : t.lower(), chars[slice(0, i)]))}
+}
+
+% end

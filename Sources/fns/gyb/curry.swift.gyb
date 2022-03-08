@@ -1,0 +1,38 @@
+%{
+import string
+
+chars = [c for c in string.ascii_uppercase]
+count = 7
+}%
+
+% for c in range(2, count + 1):
+%{
+    # [A, B, C]
+    types = chars[slice(0, c)]
+
+    argArg = "(" + ", ".join(types[slice(0, c)]) + ")"
+    
+    ret = " ".join(map(lambda t : "-> ({})".format(t), types)) + " -> Z"
+
+    # [[A, B, C], [B, C]]
+    impFnGroups = map(lambda i : types[slice(i, c)], range(c))
+    def fmtImpFnGroup(ts):
+        def fmt(t):
+            if t == ts[0]:
+                return "({}: {})".format(t.lower(), t)
+            else:
+                return "({})".format(t)
+        return " -> ".join(map(fmt, ts)) + " -> Z"
+    impFns = " in { ".join(map(fmtImpFnGroup, impFnGroups))
+
+    impArg = ", ".join(types).lower()
+}%
+public func curry<${", ".join(types) + ", Z"}>(
+    _ fn: @escaping (${argArg}) -> Z
+)
+    ${ret}
+{
+    return { ${impFns} in fn((${impArg}))${" }" * c}
+}
+
+% end

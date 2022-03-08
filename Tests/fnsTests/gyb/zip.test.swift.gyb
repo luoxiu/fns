@@ -1,0 +1,41 @@
+%{
+import string
+
+chars = [c for c in string.ascii_uppercase]
+count = 7
+}%
+
+import XCTest
+@testable import fns
+
+class Test_zip: XCTestCase {
+
+    func test() {
+    % for i in range(0, count):
+        let ${chars[i].lower()} = [${", ".join(["1"] * (i + 1))}]
+    % end
+
+    % for i in range(0, count - 1):
+        %{ types = chars[slice(0, i + 2)] }%
+        func add(${(", ".join(map(lambda t: "_ {}: Int".format(t.lower()), types)))}) -> Int {
+            return ${(" + ").join(chars[slice(0, i + 2)]).lower()}
+        }
+    
+        XCTAssertEqual(
+            zip(${(", ".join(types)).lower()}, add),
+            [${i + 2}]
+        )
+        
+        func addThrows(${(", ".join(map(lambda t: "_ {}: Int".format(t.lower()), types)))}) throws -> Int {
+            return ${(" + ").join(chars[slice(0, i + 2)]).lower()}
+        }
+    
+        XCTAssertEqual(
+            try? zip(${(", ".join(types)).lower()}, addThrows),
+            [${i + 2}]
+        )
+        
+    % end
+    }
+}
+
