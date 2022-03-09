@@ -2,6 +2,9 @@ name: ci
 
 on: [push, pull_request]
 
+env:
+  PKG_NAME: fns
+
 jobs:
   build:
 
@@ -23,11 +26,12 @@ jobs:
           xcode-version: latest-stable
       
       - name: Export Code Coverage
-        run: xcrun llvm-cov export -format="lcov" .build/debug/fnsPackageTests.xctest/Contents/MacOS/fnsPackageTests -instr-profile .build/debug/codecov/default.profdata > code-coverage.lcov
+        run: xcrun llvm-cov export -format="lcov" .build/debug/${{ env.PKG_NAME }}PackageTests.xctest/Contents/MacOS/${{ env.PKG_NAME }}PackageTests -instr-profile .build/debug/codecov/default.profdata > code-coverage.lcov
 
       - name: Upload Code Coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ./code-coverage.lcov
           verbose: true
